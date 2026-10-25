@@ -1,0 +1,254 @@
+.\" Manual page for html2md.
+.\" SPDX-License-Identifier: MIT
+.TH HTML2MD 1 "September 2026" "html2md 1.0.0" "User Commands"
+.SH NAME
+html2md \- convert HTML documents to clean, readable Markdown
+.SH SYNOPSIS
+.B html2md
+[\fIOPTION\fR]... [\fIFILE\fR]...
+.SH DESCRIPTION
+.B html2md
+reads each
+.I FILE
+(or standard input when
+.I FILE
+is
+.B \-
+or absent) and writes GitHub Flavored Markdown or CommonMark to standard
+output.
+.PP
+Input is parsed with the same error recovery rules as web browsers, so
+malformed markup (unclosed or misnested tags, stray table content, unknown
+elements) converts sensibly. Scripts, styles, forms, embedded objects,
+comments and hidden elements are removed. Markdown syntax characters that
+occur in text are escaped only where they would otherwise change the
+meaning of the output.
+.SH OPTIONS
+.SS "Input and output"
+.TP
+.BR \-o ", " \-\-output =\fIFILE\fR
+Write the result to
+.I FILE
+instead of standard output. Several inputs are concatenated, separated by
+a blank line.
+.TP
+.BR \-d ", " \-\-output\-dir =\fIDIR\fR
+Write each input file to
+.IR DIR / NAME .md,
+where
+.I NAME
+is the input's file name without its extension.
+.I DIR
+is created if it does not exist.
+.TP
+.BR \-e ", " \-\-encoding =\fINAME\fR
+Decode the input as
+.IR NAME :
+utf\-8, windows\-1252, iso\-8859\-1 (latin1), iso\-8859\-15, us\-ascii,
+utf\-16le or utf\-16be. By default the encoding is taken from a byte order
+mark or a
+.B <meta charset>
+declaration; input that is not valid UTF\-8 is decoded as windows\-1252.
+.TP
+.BR \-b ", " \-\-base\-url =\fIURL\fR
+Resolve relative link and image URLs against the absolute
+.IR URL .
+A
+.B <base href>
+in the document is honoured as well.
+.SS "Content selection"
+.TP
+.BR \-m ", " \-\-main
+Keep only the main content: the
+.B <main>
+element, an element with
+.BR role="main" ,
+or a single
+.BR <article> .
+Navigation, search forms, and headers, footers and sidebars outside the
+content are removed.
+.TP
+.BR \-s ", " \-\-select =\fISELECTOR\fR
+Convert only elements matching the CSS
+.IR SELECTOR ,
+in document order.
+.TP
+.BR \-x ", " \-\-exclude =\fISELECTOR\fR
+Remove elements matching
+.IR SELECTOR .
+May be given several times.
+.TP
+.B \-\-keep\-hidden
+Keep elements hidden with the
+.B hidden
+attribute,
+.BR aria\-hidden="true" ,
+.B display:none
+or
+.BR visibility:hidden .
+Collapsed accordion and disclosure panels are marked this way, so this
+option is what converts their text.
+.TP
+.BR \-\-links =\fIMODE\fR
+.B inline
+(default) writes [text](url);
+.B reference
+writes [text][n] with the definitions at the end;
+.B none
+keeps only the link text.
+.TP
+.BR \-\-images =\fIMODE\fR
+.B inline
+(default) writes ![alt](src);
+.B alt
+keeps only the alternative text;
+.B none
+drops images.
+.TP
+.B \-\-keep\-data\-uris
+Keep images whose source is an inline
+.B data:
+URI (dropped by default because of their size).
+.SS "Markdown style"
+.TP
+.BR \-\-flavor =\fINAME\fR
+.B gfm
+(default) uses GitHub Flavored Markdown tables, strikethrough and task
+lists.
+.B commonmark
+emits strict CommonMark and falls back to inline HTML for tables and
+strikethrough.
+.TP
+.BR \-\-heading\-style =\fISTYLE\fR
+.B atx
+(default, "# Title") or
+.B setext
+(underlined level 1 and 2 headings).
+.TP
+.BR \-\-bullet =\fICHAR\fR
+Bullet list marker:
+.B \-
+(default),
+.B *
+or
+.BR + .
+.TP
+.BR \-\-emphasis =\fICHAR\fR ", " \-\-strong =\fICHAR\fR
+Emphasis delimiters:
+.B *
+(default) or
+.BR _ .
+Where the preferred delimiter would not be recognised by a Markdown parser
+(for example in "**Note:**Text") the other delimiter or an inline HTML tag
+is used instead.
+.TP
+.BR \-\-code\-style =\fISTYLE\fR
+.B fenced
+(default, with the language taken from class names such as
+.BR language\-python )
+or
+.B indented
+code blocks.
+.TP
+.BR \-\-fence =\fICHAR\fR
+Code fence character:
+.B `
+(default) or
+.BR ~ .
+.TP
+.BR \-\-br\-style =\fISTYLE\fR
+Hard line breaks as
+.B backslash
+(default) or two trailing
+.BR spaces .
+.TP
+.BR \-w ", " \-\-wrap =\fICOLUMNS\fR
+Wrap paragraphs, list items and block quotes at
+.IR COLUMNS .
+Lines are never broken inside link destinations or code, or where the new
+line would start a different block construct.
+.B 0
+(default) disables wrapping.
+.TP
+.B \-\-compact\-tables
+Do not pad table cells to align the columns.
+.TP
+.B \-\-no\-html
+Never emit raw HTML. Superscripts, subscripts and keyboard input become
+plain text or code, and line breaks in table cells become spaces.
+.TP
+.B \-\-preserve\-nbsp
+Keep non\-breaking spaces (U+00A0) instead of converting them to ordinary
+spaces.
+.TP
+.B \-\-front\-matter
+Prepend YAML front matter with the document's title, description, author,
+date, language and URL.
+.SS Other
+.TP
+.BR \-q ", " \-\-quiet
+Suppress warnings.
+.TP
+.BR \-h ", " \-\-help
+Display a usage summary and exit.
+.TP
+.BR \-V ", " \-\-version
+Display version information and exit.
+.PP
+Long options may be abbreviated to any unambiguous prefix, and enumerated
+values may be abbreviated likewise (for example
+.BR \-\-fla=common ).
+.SH SELECTORS
+Selectors support type, universal (*), #id, .class and attribute
+selectors ([a], [a=v], [a~=v], [a|=v], [a^=v], [a$=v], [a*=v], with an
+optional " i" flag), the pseudo\-classes :not(), :is(), :where(),
+:first\-child, :last\-child, :only\-child and :empty, the descendant,
+child (>), next\-sibling (+) and subsequent\-sibling (~) combinators, and
+comma\-separated lists.
+.SH DIAGNOSTICS
+When a document converts to nothing (or almost nothing) although it contains
+text, html2md writes a warning to standard error naming the rule that removed
+the text and the option that keeps it, for example when every section of a
+page sits in a collapsed, hidden accordion panel. The exit status stays 0;
+.B \-q
+suppresses the message.
+.SH "EXIT STATUS"
+.TP
+.B 0
+All inputs were converted.
+.TP
+.B 1
+An input could not be read or an output could not be written. Remaining
+inputs are still processed.
+.TP
+.B 2
+The command line was invalid.
+.SH EXAMPLES
+Convert a saved page:
+.PP
+.RS
+html2md page.html > page.md
+.RE
+.PP
+Download a page and keep only its article, with absolute links:
+.PP
+.RS
+curl \-s https://example.com/post | html2md \-m \-b https://example.com/post
+.RE
+.PP
+Convert every article of a page, without share buttons and ads, using
+reference links:
+.PP
+.RS
+html2md \-s article \-x '.share, .ad' \-\-links=reference index.html
+.RE
+.PP
+Convert a directory of HTML files:
+.PP
+.RS
+html2md \-d notes/ exported/*.html
+.RE
+.SH "SEE ALSO"
+The CommonMark specification: https://spec.commonmark.org/
+.br
+GitHub Flavored Markdown: https://github.github.com/gfm/

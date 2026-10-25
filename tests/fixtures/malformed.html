@@ -1,0 +1,21 @@
+<title>Malformed</title>
+<p>Paragraph one
+<p>Paragraph <b>two with <i>nested</b> formatting</i> that is misnested.
+<div>A div <span>with an unclosed span
+<p>And a paragraph inside the div</div>
+Stray text after the div.</span></p>
+<ul>
+<li>First item
+<li>Second item <a href="/one">link one <a href="/two">link two</a>
+<li>Third</ul>
+<table>
+Stray text in a table
+<tr><td>A<td>B
+<tr><td>C<td>D
+</table>
+<h2>Heading <h3>without closing
+<p>Text with &amp unterminated &copy entities &#x41 and &unknown; ones.</p>
+<p><em>Emphasis never closed
+<p>Next paragraph</p>
+</body></html>
+<p>Content after the end of the document.</p>

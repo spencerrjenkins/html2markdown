@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.os }} / ${{ matrix.cc }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-latest, cc: gcc}
+          - {os: ubuntu-latest, cc: clang}
+          - {os: macos-latest, cc: clang}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: make CC=${{ matrix.cc }} CFLAGS="-O2 -Werror"
+      - name: Test
+        run: make CC=${{ matrix.cc }} test
+      - name: Build the library example
+        run: make CC=${{ matrix.cc }} examples && ./build/library_usage
+      - name: Check the C99 and C17 builds
+        run: |
+          make clean
+          make CC=${{ matrix.cc }} CFLAGS="-O2 -Werror -std=c99"
+          make clean
+          make CC=${{ matrix.cc }} CFLAGS="-O2 -Werror -std=c17"
+
+  sanitizers:
+    name: AddressSanitizer + UBSan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run every suite under sanitizers
+        run: make sanitize
+      - name: Fuzz
+        run: make fuzz FUZZ_ITERATIONS=100000
+
+  roundtrip:
+    name: CommonMark round trip (cmark-gfm)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build cmark-gfm
+        run: |
+          git clone --depth 1 https://github.com/github/cmark-gfm.git "$RUNNER_TEMP/cmark-gfm"
+          cmake -S "$RUNNER_TEMP/cmark-gfm" -B "$RUNNER_TEMP/cmark-build" \
+                -DCMAKE_BUILD_TYPE=Release -DCMARK_TESTS=OFF \
+                -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+          cmake --build "$RUNNER_TEMP/cmark-build" -j
+      - name: Build html2md
+        run: make
+      - name: Round trip over every option combination
+        run: make roundtrip CMARK="$RUNNER_TEMP/cmark-build/src/cmark-gfm"
+      - name: Differential round-trip fuzzing
+        run: |
+          python3 tests/roundtrip_fuzz.py --cmark "$RUNNER_TEMP/cmark-build/src/cmark-gfm" \
+                  --iterations 2000 tests/fixtures/*.html
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: roundtrip-failures
+          path: fuzz-failures/
+          if-no-files-found: ignore
+
+  cmake:
+    name: CMake + CTest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - run: cmake --build build -j
+      - run: ctest --test-dir build --output-on-failure
+      - name: Install
+        run: |
+          cmake --install build --prefix "$RUNNER_TEMP/prefix"
+          test -x "$RUNNER_TEMP/prefix/bin/html2md"
+          test -f "$RUNNER_TEMP/prefix/include/html2md.h"
+
+  entities:
+    name: Entity table is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Regenerate and compare
+        run: |
+          make entities
+          git diff --exit-code src/entities_data.h

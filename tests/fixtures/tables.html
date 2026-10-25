@@ -1,0 +1,31 @@
+<h2>Simple</h2>
+<table>
+  <tr><th>Language</th><th>Typing</th><th>Year</th></tr>
+  <tr><td>C</td><td>Static, weak</td><td>1972</td></tr>
+  <tr><td>Python</td><td>Dynamic, strong</td><td>1991</td></tr>
+</table>
+<h2>Aligned, formatted, with pipes</h2>
+<table>
+  <caption>Benchmark results (lower is better)</caption>
+  <thead><tr><th align="left">Test</th><th align="center">Status</th><th align="right">Time (ms)</th></tr></thead>
+  <tbody>
+    <tr><td><code>a|b</code> parse</td><td><strong>pass</strong></td><td>1.25</td></tr>
+    <tr><td><a href="/t/2">Round trip</a></td><td><em>flaky</em></td><td>13.50</td></tr>
+    <tr><td>Unicode 中文</td><td>pass</td><td>0.75</td></tr>
+  </tbody>
+</table>
+<h2>Spans</h2>
+<table>
+  <tr><th>Group</th><th>Item</th><th>Qty</th></tr>
+  <tr><td rowspan="2">Fruit</td><td>Apple</td><td>3</td></tr>
+  <tr><td>Pear</td><td>1</td></tr>
+  <tr><td colspan="2">Total</td><td>4</td></tr>
+</table>
+<h2>Block content in cells</h2>
+<table>
+  <tr><th>Step</th><th>Notes</th></tr>
+  <tr><td>1</td><td><p>First paragraph.</p><p>Second paragraph.</p></td></tr>
+  <tr><td>2</td><td><ul><li>one</li><li>two</li></ul></td></tr>
+</table>
+<h2>Layout</h2>
+<table role="presentation"><tr><td><h3>Left column</h3><p>Text</p></td><td><p>Right column</p></td></tr></table>

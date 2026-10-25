@@ -1,0 +1,11 @@
+# Relative to this file so the installation can be relocated.
+prefix=${pcfiledir}/../..
+exec_prefix=${prefix}
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: html2md
+Description: Convert HTML to clean, readable Markdown
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -lhtml2md
+Cflags: -I${includedir}

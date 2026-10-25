@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html><head><title>CLI Reference</title></head>
+<body>
+<div class="docs">
+<h1 id="cli-reference">CLI Reference<a class="headerlink" href="#cli-reference" title="Permalink to this headline">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">widget</span></code> command manages widgets.
+Press <kbd>Ctrl</kbd>+<kbd>C</kbd> to abort.</p>
+
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Running <code>widget purge</code> deletes <em>all</em> data.</p>
+</div>
+
+<h2>Installation</h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>widget
+<span class="gp">$ </span>widget<span class="w"> </span>--version
+</pre></div></div>
+
+<h2>Usage</h2>
+<pre class="language-bash"><code class="language-bash">widget create --name "demo" --size 3
+widget list | grep demo</code></pre>
+
+<p>Configuration lives in <code>~/.widgetrc</code>:</p>
+<pre><code class="hljs language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">"color"</span><span class="hljs-punctuation">:</span> <span class="hljs-string">"blue"</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">"retries"</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3</span>
+<span class="hljs-punctuation">}</span></code></pre>
+
+<h3>Options</h3>
+<table class="docutils">
+<thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>--name</code></td><td><em>none</em></td><td>Widget name (required).</td></tr>
+<tr><td><code>--size</code></td><td><code>1</code></td><td>Size, from 1 to 10.<br>Larger is slower.</td></tr>
+<tr><td><code>--force</code>, <code>-f</code></td><td><code>false</code></td><td>Overwrite existing widgets.</td></tr>
+</tbody>
+</table>
+
+<h3>Exit codes</h3>
+<dl>
+<dt><code>0</code></dt><dd>Success.</dd>
+<dt><code>2</code></dt><dd>Invalid usage. See <a href="#usage">Usage</a>.</dd>
+</dl>
+
+<h2>API</h2>
+<p>Call <code><a href="api.html#widget.create">widget.create()</a></code> from Python:</p>
+<div class="highlight-python"><div class="highlight"><pre>import widget
+w = widget.create(name="demo")  # returns a Widget
+print(w.size * 2)</pre></div></div>
+<p>See also: <a href="changelog.html">Changelog</a>, <a href="https://github.com/example/widget">GitHub</a>.</p>
+</div>
+</body></html>

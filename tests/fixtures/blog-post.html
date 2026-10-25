@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Understanding Memory Arenas | The Systems Blog</title>
+  <meta name="description" content="A practical introduction to arena allocation in C.">
+  <link rel="stylesheet" href="/css/site.css">
+  <script async src="https://analytics.example.com/tag.js"></script>
+  <script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);}</script>
+  <style>.hero { background: #fafafa; }</style>
+</head>
+<body class="post-template">
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="site-header">
+    <div class="logo"><a href="/"><img src="/logo.svg" alt="The Systems Blog"></a></div>
+    <nav aria-label="Primary">
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/archive">Archive</a></li>
+        <li><a href="/about">About</a></li>
+      </ul>
+    </nav>
+    <form role="search" action="/search"><input type="search" name="q" placeholder="Search…"><button>Go</button></form>
+  </header>
+
+  <main id="content">
+    <article>
+      <header>
+        <h1>Understanding Memory Arenas</h1>
+        <p class="byline">By <a href="/authors/ada" rel="author">Ada Lovelace</a> &middot; <time datetime="2026-03-14">March 14, 2026</time></p>
+      </header>
+
+      <p>Allocating many small objects with <code>malloc</code> is <em>slow</em> and makes
+      cleanup error-prone. An <strong>arena</strong> (also called a <dfn>region</dfn>) solves
+      both problems.</p>
+
+      <h2 id="how">How it works</h2>
+      <p>An arena hands out memory by bumping a pointer:</p>
+      <pre><code class="language-c">void *arena_alloc(Arena *a, size_t n) {
+    n = (n + 15) &amp; ~(size_t)15;   /* align to 16 bytes */
+    if (a-&gt;used + n &gt; a-&gt;cap)
+        return NULL;
+    void *p = a-&gt;base + a-&gt;used;
+    a-&gt;used += n;
+    return p;
+}</code></pre>
+      <p>Freeing is a single call &mdash; everything goes at once.</p>
+
+      <h2 id="tradeoffs">Trade-offs</h2>
+      <ul>
+        <li><strong>Pros:</strong> fast, cache friendly, no leaks.</li>
+        <li><strong>Cons:</strong> no individual <code>free()</code>; memory is held until the arena is reset.</li>
+      </ul>
+      <blockquote>
+        <p>“Premature optimization is the root of all evil.”</p>
+        <footer>— <cite>Donald Knuth</cite></footer>
+      </blockquote>
+      <figure>
+        <img src="/img/arena-diagram.png" alt="Diagram of an arena with a bump pointer" width="640" height="320">
+        <figcaption>Figure 1: The bump pointer moves right on each allocation.</figcaption>
+      </figure>
+      <aside class="note"><p><strong>Note:</strong> arenas pair well with string interning.</p></aside>
+      <div class="share"><a href="https://twitter.com/intent/tweet?url=x">Share on X</a> <a href="#" onclick="copy()">Copy link</a></div>
+      <img src="https://pixel.example.com/t.gif" width="1" height="1" alt="">
+    </article>
+
+    <section class="comments">
+      <h2>3 Comments</h2>
+      <form action="/comment" method="post"><textarea name="c"></textarea><button type="submit">Post comment</button></form>
+    </section>
+  </main>
+
+  <aside class="sidebar"><h3>Popular posts</h3><ul><li><a href="/p/1">Post one</a></li></ul></aside>
+  <footer class="site-footer"><p>&copy; 2026 The Systems Blog. <a href="/privacy">Privacy</a></p></footer>
+  <div id="cookie-banner" style="display:none">We use cookies. <button>Accept</button></div>
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# Build output
+/build/
+/build-*/
+*.o
+*.a
+*.so
+*.dylib
+*.dSYM/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+
+# Fuzzing and test artifacts
+/fuzz-failures/
+crash-*
+leak-*
+timeout-*
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+__pycache__/
